@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <!-- Include Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f8f0fc;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #333;
+    }
+    .container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 400px;
+      position: relative;
+    }
+    .logo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .logo-container img {
+      width: 250px; /* Adjust as needed */
+      height: auto;
+      margin-bottom: 30px;
+    }
+    h2 {
+      color: #6f42c1;
+    }
+    h4 {
+      color: #FF0000;
+      padding: 20px;
+      align-items: center;
+    }
+    .file-input-container {
+      position: relative;
+      width: 100%; /* Adjust to fit container */
+      margin: 0 auto 40px;
+    }
+    .file-input-container input[type="file"] {
+      display: none;
+    }
+    .file-input-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      background-color: #d63384;
+      color: #fff5ee;
+      cursor: pointer;
+      width: 100%; /* Adjust width to fit container */
+      max-width: 100%; /* Ensure it doesn't exceed container */
+      overflow-wrap: break-word; /* Allow text to wrap */
+      text-align: center; /* Center align text */
+      box-sizing: border-box; /* Include padding and border in width */
+    }
+    .file-input-label i {
+      text-align: center;
+      font-size: 22px;
+    }
+    .file-name {
+      margin-top: 5px;
+      font-size: 16px; /* Match font size */
+      text-align: center;
+      color: #333;
+    }
+    input[type="email"] {
+      width: calc(100% - 20px);
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px; /* Match font size */
+    }
+    button {
+      background-color: #d63384;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px; /* Match font size */
+      width: 120px; /* Adjust size for circular button */
+      height: 120px; /* Adjust size for circular button */
+      border-radius: 50%; /* Make the button circular */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin: 0 auto; /* Center the button */
+      overflow: hidden;
+      transition: background-color 0.3s;
+    }
+
+    button i {
+      font-size: 26px;
+      transition: opacity 0.3s;
+    }
+
+    button .btn-text {
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap; /* Prevents text from wrapping */
+    }
+    button:hover .btn-text {
+      visibility: visible;
+      opacity: 1;
+      font-size: 25px;
+    }
+    button:hover i {
+      visibility: hidden;
+      opacity: 0;
+    }
+    button.loading i {
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    button.loading .btn-text {
+      visibility: hidden;
+      opacity: 1;
+      font-size: 20px;
+    }
+
+    button.loading .spinner {
+      display: block;
+    }
+
+    .spinner {
+      border: 4px solid rgba(0,0,0,0.1); /* Light grey */
+      border-left: 4px solid #fff; /* White */
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin: auto;
+      display: none; /* Hidden by default */
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    pre {
+      text-align: left;
+      background-color: #f0f0f0;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      white-space: pre-wrap; /* Wraps long lines */
+      word-wrap: break-word; /* Breaks words to fit within container */
+      display: none; /* Initially hidden */
+    }
+    h3 {
+      display: none; /* Initially hidden */
+      color: #6f42c1; /* Match header color with h2 */
+    }
+    .decorations {
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle at top left, #f8d7da, #f5c6cb);
+      border-radius: 50%;
+      z-index: -1;
+    }
+    .decorations::before {
+      content: '';
+      position: absolute;
+      top: 80px;
+      left: -40px;
+      width: 60px;
+      height: 60px;
+      background: radial-gradient(circle at bottom right, #e2d5f3, #d1c4e9);
+      border-radius: 50%;
+      z-index: -1;
+    }
+  </style>
+  <script>
+    function uploadFile() {
+      
+      var fileInput = document.getElementById('file');
+      var emailInput = document.getElementById('email').value;
+      var file = fileInput.files[0];
+      var errorMessage = document.getElementById('errorMessage');
+
+       // Hide the error message initially
+      errorMessage.style.display = 'none';
+
+      if (!file || !emailInput) {
+        // Show error message if file or email is missing
+        errorMessage.style.display = 'block';
+        errorMessage.textContent = 'Please fill in both the file and email fields.';
+        return; // Exit the function if validation fails
+      }
+  
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var base64Data = e.target.result.split(',')[1];
+        google.script.run.withSuccessHandler(onSuccess)
+                       .withFailureHandler(onFailure)
+                       .uploadFile(base64Data, emailInput);
+      };
+      reader.readAsDataURL(file);
+      
+      var button = document.querySelector('button');
+      button.classList.add('loading'); // Add loading class
+    }
+
+    function onSuccess(result) {
+      var button = document.querySelector('button');
+      button.classList.remove('loading'); // Remove loading class
+      if (result.status === 'success') {
+        document.getElementById('ocrResult').innerText = result.message; // Display success message
+        document.querySelector('h3').style.display = 'block'; // Make h3 visible
+        document.getElementById('ocrResult').style.display = 'block'; // Make pre visible
+
+        // Fetch the receipt data and display in the <pre> element
+        google.script.run.withSuccessHandler(displayReceipt).getReceiptData();
+      } else {
+        document.getElementById('ocrResult').innerText = 'Error: ' + result.message;
+      }
+    }
+
+    function onFailure(error) {
+      var button = document.querySelector('button');
+      button.classList.remove('loading'); // Remove loading class
+      document.getElementById('ocrResult').     innerText = 'Error: ' + error.message;
+    }
+
+    function wrapText(text, maxLength) {
+      var result = '';
+      var lines = text.split('\n');
+
+      lines.forEach(function(line) {
+        while (line.length > maxLength) {
+          result += line.substring(0, maxLength) + '\n';
+          line = line.substring(maxLength);
+        }
+        result += line + '\n';
+      });
+
+      return result;
+    }
+
+    function displayReceipt(receiptData) {
+      var body = "Here are the items from your receipt:\n\n";
+
+      receiptData.forEach(function(row) {
+        try {
+          var itemName = row[0];
+          var itemQuantity = row[1];
+          var itemPrice = row[2];
+
+          // Skip items that are not strings
+          if (typeof itemName !== 'string') {
+            return; // Skip this item
+          }
+
+          itemName = itemName.padEnd(27, ' ');  // Adjust padding as needed
+          itemQuantity = itemQuantity.toString().padEnd(7, ' ');
+          itemPrice = itemPrice.toFixed(2).padEnd(7, ' ');
+
+          body += `${itemName}\t${itemQuantity}\t${itemPrice}\n`;
+        } catch (e) {
+          console.error('Error processing row: ' + row + ', Error: ' + e);
+          // Skip the row if an error occurs
+        }
+      });
+
+      // Wrap text before displaying it
+      var wrappedText = wrapText(body, 50); // Adjust maxLength as needed
+
+      document.getElementById('ocrResult').innerText = wrappedText;
+    }
+
+    function updateFileName() {
+      var fileInput = document.getElementById('file');
+      var fileNameDisplay = document.getElementById('fileName');
+      fileNameDisplay.textContent = fileInput.files.length > 0 ? fileInput.files[0].name : 'No file chosen';
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="decorations"></div>
+    <div class="logo-container">
+      <img src="https://drive.google.com/thumbnail?export=view&id=1sAJ5-V_lGJLmpiLrtY0aAT5F3JcOmMgU" border="0" alt="Logo" title="Logo"> 
+    </div>
+    <div class="file-input-container">
+      <label for="file" class="file-input-label">
+        <i class="fas fa-file-upload"></i>
+        <span id="fileName" class="file-name">No file chosen</span>
+      </label>
+      <input type="file" id="file" onchange="updateFileName()">
+    </div>
+    <h2>Enter your email address</h2>
+    <input type="email" id="email" placeholder="Enter your email address"><br><br>
+    <button onclick="uploadFile()">
+      <i class="fas fa-upload"></i>
+      <span class="btn-text">Upload</span>
+      <div class="spinner"></div> <!-- Spinner for loading -->
+    </button>
+    <h3>Digitalised Receipt:</h3>
+    <pre id="ocrResult"></pre>
+    <h4><div id="errorMessage" class="error-message"></div></h4> <!-- Error message -->
+  </div>
+</body>
+</html>
